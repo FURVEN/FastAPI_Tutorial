@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, status
 from pydantic import BaseModel
 
 app = FastAPI()
@@ -30,9 +30,13 @@ class Item(BaseModel): # 요청 본문 검증을 위한 Item 모델 정의
     in_stock: bool = True
 
 # 새 아이템 등록
-@app.post("/Items") # POST 요청과 경로 매핑 설정
+@app.post(
+        "/Items",
+        response_model=Item,
+        status_code=status.HTTP_201_CREATED
+        ) # POST 요청과 경로 매핑 설정
 def create_item_handler(item: Item): # 요청 본문 데이터를 Item 객체로 변환
-    return {"Message": f"아이템 '{item.name}'이(가) 추가되었습니다.", "item": item}
+    return item
 
 # 경로 변수, 쿼리 파라미터, 요청 본문 혼합 사용
 @app.put("/items/{item_id}")
@@ -40,5 +44,6 @@ def update_item_handler(item_id: int, assignee: str, item: Item):
     return {
         "item_id": item_id,
         "assignee": assignee, # 담당자 또는 작업자
-        "item": Item
+        "item": item
     }
+
